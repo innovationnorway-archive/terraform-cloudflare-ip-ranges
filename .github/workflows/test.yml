@@ -11,11 +11,21 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        terraform:
+          - 0.12.30
+          - 0.13.6
+          - 0.14.6
     steps:
       - uses: actions/checkout@v2
       - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ matrix.terraform }}
       - run: terraform fmt -check -recursive
       - run: |
-          terraform init -backend=false -input=false
+          terraform init -input=false
           terraform validate
+          terraform apply -auto-approve -input=false
+          terraform destroy -auto-approve
         working-directory: test

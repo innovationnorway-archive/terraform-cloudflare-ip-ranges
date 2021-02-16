@@ -1,9 +1,29 @@
-![test](https://github.com/innovationnorway/terraform-module-template/workflows/test/badge.svg)
+![test](https://github.com/innovationnorway/terraform-cloudflare-ip-ranges/workflows/test/badge.svg)
 
-# Create a Terraform module
+# Cloudflare IP Ranges Module
 
-Use this template to bootstrap the creation of a Terraform module :rocket:
+Use this Terraform module to retrieve [Cloudflare IP ranges](https://www.cloudflare.com/ips/).
 
-## Create a module from this template
+## Example Usage
 
-Click the `Use this template` button and provide a repo name using this three-part name format: `terraform-<PROVIDER>-<NAME>`
+```terraform
+module "ip_ranges" {
+  source = "innovationnorway/cloudflare/ip-ranges"
+}
+
+resource "azurerm_app_service" "example" {
+  name = "example"
+
+  ...
+
+  site_config {
+    dynamic "ip_restriction" {
+      for_each = toset(module.ip_ranges.cidrs)
+
+      content {
+        ip_address = ip_restriction.key
+      }
+    }
+  }
+}
+```
