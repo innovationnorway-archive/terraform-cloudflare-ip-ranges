@@ -9,13 +9,28 @@ on:
     paths-ignore:
       - "**.md"
 jobs:
+  tflint:
+    runs-on: ubuntu-latest
+    container: wata727/tflint
+    steps:
+      - uses: actions/checkout@v2
+      - run: tflint
   terraform:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        terraform:
+          - 0.13.6
+          - 0.14.7
     steps:
       - uses: actions/checkout@v2
       - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ matrix.terraform }}
       - run: terraform fmt -check -recursive
       - run: |
-          terraform init -backend=false -input=false
+          terraform init -input=false
           terraform validate
+          terraform apply -auto-approve -input=false
+          terraform destroy -auto-approve
         working-directory: test
